@@ -1,0 +1,11 @@
+C:\Users\Fedor\RiderProjects\Domino\Domino\bin\Debug\netcoreapp3.1\Domino.exe
+C:\Users\Fedor\RiderProjects\Domino\Domino\bin\Debug\netcoreapp3.1\Domino.deps.json
+C:\Users\Fedor\RiderProjects\Domino\Domino\bin\Debug\netcoreapp3.1\Domino.runtimeconfig.json
+C:\Users\Fedor\RiderProjects\Domino\Domino\bin\Debug\netcoreapp3.1\Domino.runtimeconfig.dev.json
+C:\Users\Fedor\RiderProjects\Domino\Domino\bin\Debug\netcoreapp3.1\Domino.dll
+C:\Users\Fedor\RiderProjects\Domino\Domino\bin\Debug\netcoreapp3.1\Domino.pdb
+C:\Users\Fedor\RiderProjects\Domino\Domino\obj\Debug\netcoreapp3.1\Domino.csprojAssemblyReference.cache
+C:\Users\Fedor\RiderProjects\Domino\Domino\obj\Debug\netcoreapp3.1\Domino.AssemblyInfoInputs.cache
+C:\Users\Fedor\RiderProjects\Domino\Domino\obj\Debug\netcoreapp3.1\Domino.AssemblyInfo.cs
+C:\Users\Fedor\RiderProjects\Domino\Domino\obj\Debug\netcoreapp3.1\Domino.dll
+C:\Users\Fedor\RiderProjects\Domino\Domino\obj\Debug\netcoreapp3.1\Domino.pdb

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\Fedor\.Rider2019.3\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Fedor\.Rider2019.3\system\resharper-host\local\Transient\ReSharperHost\v193\SolutionCaches\_Domino.1387601377.00" t="ExcludeRecursive" />
+    <e p="C:\Users\Fedor\RiderProjects\Domino" t="IncludeFlat">
+      <e p="Domino" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Domino.csproj" t="IncludeRecursive" />
+        <e p="MFPlayer.cs" t="Include" />
+        <e p="MSPlyaer.cs" t="Include" />
+        <e p="MTable.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="Domino.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="Domino.sln" t="IncludeFlat" />
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>
