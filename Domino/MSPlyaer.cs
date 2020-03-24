@@ -11,6 +11,9 @@ namespace Domino
         static public string PlayerName = "Бывалый";
         static private List<MTable.SBone> lHand;
         
+        // Значения, за которыми соперник ходит на базар
+        static private List<int> nopeValues;
+        
         // Отсортированная рука по сумме очков
         static public List<MTable.SBone> newHand = SortHand(lHand);
 
@@ -41,16 +44,12 @@ namespace Domino
             //состояние стола
             List<MTable.SBone> tableCondition = MTable.GetGameCollection();
 
-            //доминошки на концах цепочки
-            MTable.SBone sLeft = tableCondition[0];
-            MTable.SBone sRight = tableCondition[tableCondition.Count - 1];
-
             //доминошки, ушедшие из игры
             List<MTable.SBone> sBones;
             
-            //значения, за которыми соперник ходит на базар
-            List<int> nopeBones = new List<int>();
-
+            // Значения, за которыми соперник ходит на базар
+            nopeValues = RememberNopeValues(nopeValues);
+            
             //кол-во доминошек на базаре
             int countBonesOnShop = MTable.GetShopCount();
             
@@ -62,15 +61,142 @@ namespace Domino
             if (tableCondition.Count == 0)
             {
                 sb = GetBoneOnZeroTurn(newHand);
+                lHand.Remove(sb);
+                newHand.Remove(sb);
             }
-            
-            
+
+            // Делаем ход, если уже есть доминошки на столе
+            if (tableCondition.Count != 0)
+            {
+                // 1 Доминошка на столе
+                if (tableCondition.Count == 1)
+                {
+                    // Доминошки на концах цепочки
+                    MTable.SBone sLeft = tableCondition[0];
+                    
+                    // Значения на концах
+                    leftValue = sLeft.First;
+                    rightValue = sLeft.Second;
+                }
+                
+                // Несколько доминошек на столе
+                if (tableCondition.Count >= 2)
+                {
+                    // Доминошки на концах цепочки
+                    MTable.SBone sLeft = tableCondition[0];
+                    MTable.SBone sRight = tableCondition[tableCondition.Count - 1];
+
+                    // Доминошки предыдущие за последними
+                    MTable.SBone sLeftNext = tableCondition[1];
+                    MTable.SBone sPreRight = tableCondition[tableCondition.Count - 2];
+
+                    // Левые 2 последние доминошки соеденены First'ом
+                    if (sLeftNext.First == sLeft.First)
+                    {
+                        leftValue = sLeft.Second;
+                    }
+
+                    // Левые 2 последние доминошки соеденены Second'ом
+                    if (sLeftNext.Second == sLeft.Second)
+                    {
+                        leftValue = sLeft.First;
+                    }
+
+
+                    // Правые 2 последние доминошки соеденены First'ом
+                    if (sLeftNext.First == sLeft.First)
+                    {
+                        rightValue = sLeft.Second;
+                    }
+
+                    // Правые 2 последние доминошки соеденены Second'ом
+                    if (sLeftNext.Second == sLeft.Second)
+                    {
+                        rightValue = sLeft.First;
+                    }
+
+                }
+
+                // Если мы не можем походить, то обращаемся к базару
+                while (!numbers.Contains(rightValue) && !numbers.Contains(leftValue))
+                {
+                    // Проверяем есть ли доминошки в базаре,
+                    // Если есть, то берем
+                    MTable.SBone newSBone;
+                    if (MTable.GetFromShop(out newSBone))
+                    {
+                        lHand.Add(newSBone);
+                        numbers = FillListWithValues();
+                        newHand = SortHand(lHand);
+                        return true;
+                    }
+                    
+                    // Если нет, то пропускаем ход
+                    if (!MTable.GetFromShop(out newSBone))
+                    {
+                        return false;
+                    }
+                }
+                
+                // Можем походить 
+                // Отсортированная рука по сумме и с подходящеми доминошками (чем можем походить)
+                List<MTable.SBone> suitableHand = new List<MTable.SBone>();
+                foreach (var sBone in newHand)
+                {
+                    if (sBone.First == rightValue || sBone.First == leftValue ||
+                        sBone.Second == rightValue || sBone.Second == leftValue)
+                        suitableHand.Add(sBone);
+                }
+
+                foreach (var sBone in suitableHand)
+                {
+                    // Если мы знаем что соперник ходил на базар
+                    if (nopeValues.Count != 0)
+                    {
+                        // Первая часть доминошки соединяется со столом и вторая часть -- значение, которого нет у соперника
+                        if (sBone.First == leftValue || sBone.First == rightValue)
+                        {
+                            if (nopeValues.Contains(sBone.Second))
+                            {
+
+                            }
+                        }
+
+                        // Вторая часть доминошки соединяется со столом и первая часть -- значение, которого нет у соперника
+                        if (sBone.Second == leftValue || sBone.Second == rightValue)
+                        {
+                            if (nopeValues.Contains(sBone.First))
+                            {
+
+                            }
+                        }
+                    }
+
+                    // Соперник не ходил на базар
+                    if (nopeValues.Count == 0)
+                    {
+                        // Не в конце игры (когда базар еще не пустой)
+                        // Есть ли на руках доминошка, которую можем положить на оба конца, то мы ее кладем
+                        // Какой стороной кладем?
+                        // 1) Постараться положить так, чтобы на концах были значения, которые у нас есть 
+                        // 2) Логика с кол-м значений в игре
+                        
+                        // Конец игры
+                        
+                    }
+                }
+                
+                
+                
+            }
+
+            countBonesInShop = MTable.GetShopCount();
             return true;
         }
 
         #region Logic
         
-        // Ставим доминошку с максимальной суммой и еще числа которой повторяются
+        // Ставим доминошку с максимальной суммой и еще числа которой повторяются на нулевой ход
         static public MTable.SBone GetBoneOnZeroTurn(List<MTable.SBone> newHand)
         {
             MTable.SBone s = newHand[0];
@@ -85,6 +211,17 @@ namespace Domino
             return s;
         }
         
+        // Запоминаем значения, за которыми проитивник ходит на базар
+        static public List<int> RememberNopeValues(List<int> nopeValues)
+        {
+            if (countBonesInShop != MTable.GetShopCount())
+            {
+                nopeValues.Add(rightValue);
+                nopeValues.Add(leftValue);
+            }
+
+            return nopeValues;
+        }
         
         // добавить доминушку в свою руку
         static public void AddItem(MTable.SBone sb)
@@ -120,6 +257,10 @@ namespace Domino
         #endregion
         
         #region Helpers
+        
+        // Значения на краях стола
+        static public int rightValue;
+        static public int leftValue;
         
         // Создаем и заполняем список всех значений на руке
         static public List<int> numbers = FillListWithValues();
@@ -168,9 +309,11 @@ namespace Domino
 
             return hand;
         }
-        
+
+        static public int countBonesInShop;
+
         #endregion
-        
+
     }
     
 }
