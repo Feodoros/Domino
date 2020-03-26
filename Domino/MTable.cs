@@ -324,7 +324,7 @@ namespace Domino
         while(efFinish == EFinish.Play);
         // результат текущей игры
         Console.WriteLine(arrFinishMsg[(int) efFinish]);
-        Console.WriteLine("СЧЕТ -- " + MFPlayer.GetScore() + ":" + MSPlayer.GetScore());
+        Console.WriteLine("СЧЕТ -- " + MFPlayer.GetScore() + ":" + MSPlayer.GetScoreFromHand());
         Console.ReadLine();
         }
     }
