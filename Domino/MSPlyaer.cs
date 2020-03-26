@@ -175,8 +175,6 @@ namespace Domino
                     
                     
                     
-                    
-                    
                 }
                 
                 // Несколько доминошек на столе
@@ -214,105 +212,134 @@ namespace Domino
                     {
                         rightValue = sRight.First;
                     }
-
-                }
-
-                
-                
-                // Можем походить 
-                // Отсортированная рука по сумме и с подходящеми доминошками (чем можем походить)
-                List<MTable.SBone> suitableHand = new List<MTable.SBone>();
-                foreach (var sBone in newHand)
-                {
-                    if (sBone.First == rightValue || sBone.First == leftValue ||
-                        sBone.Second == rightValue || sBone.Second == leftValue)
-                        suitableHand.Add(sBone);
-                }
-
-                foreach (var sBone in suitableHand)
-                {
-                    // Если кол-во очков на базаре и на руке у соперника 
-                    // Больше, чем у нас, то вынудим соперника взять весь базар
-                    if (193 - GetScoreFromHand() + GetScoreFromTable() < GetScoreFromHand() + GetScoreFromTable())
+                    
+                    
+                    // Если мы не можем походить, то обращаемся к базару
+                    bool checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+                    if (checkHand)
                     {
-                        // Список всех значений на столе и на нашей руке
-                        List<int> FullListOfValues = numbersInHand.Concat(numbersInTable).ToList();
-                        
-                        // Список всех доминошек на руке(которые подходят) и на столе
-                        List<MTable.SBone> FullListOfSbones = MTable.GetGameCollection().Concat(suitableHand).ToList();
-                        
-                        // Словарь кол-ва значенийй на руке и на столе
-                        Dictionary<int, int> FullFreqDict =
-                            FillDictWithFreqOfValues(FullListOfSbones, FullListOfValues);
-
-                        // Лист из значений, чья частота 5 или 6
-                        List<int> mostFreqList = new List<int>();
-                        foreach (var kvp in FullFreqDict)
+                        while (checkHand)
                         {
-                            if(kvp.Value >= 5)
-                                mostFreqList.Add(kvp.Key);
-                        }
-
-                        // Проверяем можем ли положить доминошку с такими значениями,
-                        // Которых больше всего на столе и у нас на руке 
-                        if ((sBone.First == rightValue && mostFreqList.Contains(sBone.Second) &&
-                             sBone.Second == leftValue) ||
-                            (sBone.Second == rightValue && mostFreqList.Contains(sBone.First) &&
-                             sBone.First == leftValue) ||
-                            (sBone.First == leftValue && mostFreqList.Contains(sBone.Second) &&
-                             sBone.Second == rightValue) ||
-                            (sBone.Second == leftValue && mostFreqList.Contains(sBone.First) &&
-                             sBone.First == rightValue))
-                        {
-                            // ВОЗВРАЩАЕМ ДОМИНОШКУ
-                        }
-                        
-                        
-                    }
-                    
-                    
-                    
-                    
-                    // Если мы знаем что соперник ходил на базар
-                    if (nopeValues.Count != 0)
-                    {
-                        // Первая часть доминошки соединяется со столом и вторая часть -- значение, которого нет у соперника
-                        if (sBone.First == leftValue || sBone.First == rightValue)
-                        {
-                            if (nopeValues.Contains(sBone.Second))
+                            checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+                            // Проверяем есть ли доминошки в базаре,
+                            // Если есть, то берем
+                            MTable.SBone newSBone;
+                            if (MTable.GetFromShop(out newSBone))
                             {
-
+                                lHand.Add(newSBone);
+                                numbersInHand = FillListWithValues(lHand);
+                                return true;
+                            }
+                    
+                            // Если нет, то пропускаем ход
+                            if (!MTable.GetFromShop(out newSBone))
+                            {
+                                return false;
                             }
                         }
 
-                        // Вторая часть доминошки соединяется со столом и первая часть -- значение, которого нет у соперника
-                        if (sBone.Second == leftValue || sBone.Second == rightValue)
+                        sb = lHand.Last();
+                        lHand.Remove(sb);
+                    }
+                    
+                    // Можем походить 
+                    if(!checkHand)
+                    {
+                        // Отсортированная рука по сумме и с подходящеми доминошками (чем можем походить)
+                        List<MTable.SBone> suitableHand = new List<MTable.SBone>();
+                        foreach (var sBone in newHand)
                         {
-                            if (nopeValues.Contains(sBone.First))
-                            {
+                            if (sBone.First == rightValue || sBone.First == leftValue ||
+                                sBone.Second == rightValue || sBone.Second == leftValue)
+                                suitableHand.Add(sBone);
+                        }
 
+                        foreach (var sBone in suitableHand)
+                        {
+                            // Если кол-во очков на базаре и на руке у соперника 
+                            // Больше, чем у нас, то вынудим соперника взять весь базар
+                            if (193 - GetScoreFromHand() + GetScoreFromTable() < GetScoreFromHand() + GetScoreFromTable())
+                            {
+                                // Список всех значений на столе и на нашей руке
+                                List<int> FullListOfValues = numbersInHand.Concat(numbersInTable).ToList();
+                                
+                                // Список всех доминошек на руке(которые подходят) и на столе
+                                List<MTable.SBone> FullListOfSbones = MTable.GetGameCollection().Concat(suitableHand).ToList();
+                                
+                                // Словарь кол-ва значенийй на руке и на столе
+                                Dictionary<int, int> FullFreqDict =
+                                    FillDictWithFreqOfValues(FullListOfSbones, FullListOfValues);
+
+                                // Лист из значений, чья частота 5 или 6
+                                List<int> mostFreqList = new List<int>();
+                                foreach (var kvp in FullFreqDict)
+                                {
+                                    if(kvp.Value >= 5)
+                                        mostFreqList.Add(kvp.Key);
+                                }
+
+                                // Проверяем можем ли положить доминошку с такими значениями,
+                                // Которых больше всего на столе и у нас на руке 
+                                if ((sBone.First == rightValue && mostFreqList.Contains(sBone.Second) &&
+                                     sBone.Second == leftValue) ||
+                                    (sBone.Second == rightValue && mostFreqList.Contains(sBone.First) &&
+                                     sBone.First == leftValue) ||
+                                    (sBone.First == leftValue && mostFreqList.Contains(sBone.Second) &&
+                                     sBone.Second == rightValue) ||
+                                    (sBone.Second == leftValue && mostFreqList.Contains(sBone.First) &&
+                                     sBone.First == rightValue))
+                                {
+                                    // ВОЗВРАЩАЕМ ДОМИНОШКУ
+                                }
+                            
+                        
+                            }    
+                    
+                    
+                            
+                            // Если мы знаем что соперник ходил на базар
+                            if (nopeValues.Count != 0)
+                            {
+                                // Первая часть доминошки соединяется со столом и вторая часть -- значение, которого нет у соперника
+                                if (sBone.First == leftValue || sBone.First == rightValue)
+                                {
+                                    if (nopeValues.Contains(sBone.Second))
+                                    {
+
+                                    }
+                                }
+
+                                // Вторая часть доминошки соединяется со столом и первая часть -- значение, которого нет у соперника
+                                if (sBone.Second == leftValue || sBone.Second == rightValue)
+                                {
+                                    if (nopeValues.Contains(sBone.First))
+                                    {
+
+                                    }
+                                }
+                            }
+
+                            // Соперник не ходил на базар
+                            if (nopeValues.Count == 0)
+                            {
+                                
+                                
+                                // Не в конце игры (когда базар еще не пустой)
+                                // Есть ли на руках доминошка, которую можем положить на оба конца, то мы ее кладем
+                                // Какой стороной кладем?
+                                // 1) Постараться положить так, чтобы на концах были значения, которые у нас есть 
+                                // 2) Логика с кол-м значений в игре
+                                
+                                // Конец игры
+                                
                             }
                         }
+                
                     }
 
-                    // Соперник не ходил на базар
-                    if (nopeValues.Count == 0)
-                    {
-                        
-                        
-                        // Не в конце игры (когда базар еще не пустой)
-                        // Есть ли на руках доминошка, которую можем положить на оба конца, то мы ее кладем
-                        // Какой стороной кладем?
-                        // 1) Постараться положить так, чтобы на концах были значения, которые у нас есть 
-                        // 2) Логика с кол-м значений в игре
-                        
-                        // Конец игры
-                        
-                    }
                 }
-                
-                
-                
+
+
             }
 
             countBonesInShop = MTable.GetShopCount();
