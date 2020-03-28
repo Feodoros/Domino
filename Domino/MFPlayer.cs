@@ -38,12 +38,23 @@ namespace Domino
         static public int GetScore()
         {
             int sum = 0;
-            foreach (var sBone in lHand)
+            
+            if (lHand.Count == 1)
             {
-                sum += sBone.First;
-                sum += sBone.Second;
+                if (lHand[0].First == 0 && lHand[0].Second == 0)
+                    sum = 25;
             }
 
+            else
+            {
+                foreach (var sBone in lHand)
+                {
+                    sum += sBone.First;
+                    sum += sBone.Second;
+                }
+                
+            }
+            
             return sum;
 
         }
@@ -51,13 +62,176 @@ namespace Domino
         // сделать ход
         static public bool MakeStep(out MTable.SBone sb, out bool End)
         {
+            List<int> numbersInHand = FillListWithValues(lHand);
+            
             sb = lHand.First();
             End = true;
-            // Нам падается доминошка. В зависимости от этой доминошки
-            // будем делать ход согласно нашей стратегии.
-            // Другой игрок будет делать ход по дефолтной стратегии.
+            
+            if (MTable.GetGameCollection().Count == 0)
+            {
+                Random r = new Random();
+                sb = lHand[r.Next(0, lHand.Count)];
+            }
+
+            if (MTable.GetGameCollection().Count >= 1)
+            {
+                // 1 Доминошка на столе
+                if (MTable.GetGameCollection().Count == 1)
+                {
+                    // Доминошки на концах цепочки
+                    MTable.SBone sLeft = MTable.GetGameCollection()[0];
+
+                    // Значения на концах
+                    int leftValue = sLeft.First;
+                    int rightValue = sLeft.Second;
+
+
+                    // Если мы не можем походить, то обращаемся к базару
+                    bool checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+                    if (checkHand)
+                    {
+                        while (checkHand)
+                        {
+                            checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+                            // Проверяем есть ли доминошки в базаре,
+                            // Если есть, то берем
+                            MTable.SBone newSBone;
+                            if (MTable.GetFromShop(out newSBone))
+                            {
+                                lHand.Add(newSBone);
+                                numbersInHand = FillListWithValues(lHand);
+                                sb = lHand.Last();
+                                lHand.Remove(sb);
+                                return true;
+                            }
+
+                            // Если нет, то пропускаем ход
+                            if (!MTable.GetFromShop(out newSBone))
+                            {
+                                sb = lHand.First();
+                                return false;
+                            }
+                        }
+                    }
+
+                    // Можем походить 
+                    if (!checkHand)
+                    {
+                        // Рука с подходящеми доминошками (чем можем походить)
+                        List<MTable.SBone> suitableHand1 = new List<MTable.SBone>();
+                        foreach (var sBone in lHand)
+                        {
+                            if (sBone.First == rightValue || sBone.First == leftValue ||
+                                sBone.Second == rightValue || sBone.Second == leftValue)
+                                suitableHand1.Add(sBone);
+                        }
+
+                        Random r = new Random();
+                        sb = suitableHand1[r.Next(0, suitableHand1.Count)];
+                    }
+                }
+
+                List<MTable.SBone> tableCondition = MTable.GetGameCollection();
+                // Несколько доминошек на столе
+                if (tableCondition.Count >= 2)
+                {
+                    // Доминошки на концах цепочки
+                    MTable.SBone sLeft = tableCondition[0];
+                    MTable.SBone sRight = tableCondition[tableCondition.Count - 1];
+
+                    // Доминошки предыдущие за последними
+                    MTable.SBone sLeftNext = tableCondition[1];
+                    MTable.SBone sPreRight = tableCondition[tableCondition.Count - 2];
+
+                    int leftValue = -1;
+                    int rightValue = -1;
+                    // Левые 2 последние доминошки соеденены First'ом
+                    if (sLeftNext.First == sLeft.First)
+                    {
+                        leftValue = sLeft.Second;
+                    }
+
+                    // Левые 2 последние доминошки соеденены Second'ом
+                    if (sLeftNext.Second == sLeft.Second)
+                    {
+                        leftValue = sLeft.First;
+                    }
+
+
+                    // Правые 2 последние доминошки соеденены First'ом
+                    if (sPreRight.First == sRight.First)
+                    {
+                        rightValue = sRight.Second;
+                    }
+
+                    // Правые 2 последние доминошки соеденены Second'ом
+                    if (sPreRight.Second == sRight.Second)
+                    {
+                        rightValue = sRight.First;
+                    }
+                    
+                    
+                    // Если мы не можем походить, то обращаемся к базару
+                    bool checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+                    if (checkHand)
+                    {
+                        while (checkHand)
+                        {
+                            checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+                            // Проверяем есть ли доминошки в базаре,
+                            // Если есть, то берем
+                            MTable.SBone newSBone;
+                            if (MTable.GetFromShop(out newSBone))
+                            {
+                                lHand.Add(newSBone);
+                                numbersInHand = FillListWithValues(lHand);
+                                sb = lHand.Last();
+                                lHand.Remove(sb);
+                                return true;
+                            }
+                    
+                            // Если нет, то пропускаем ход
+                            if (!MTable.GetFromShop(out newSBone))
+                            {
+                                sb = lHand.Last();
+                                return false;
+                            }
+                        }
+                    }
+                    
+                    // Можем походить 
+                    if(!checkHand)
+                    {
+                        // Рука с подходящеми доминошками (чем можем походить)
+                        List<MTable.SBone> suitableHand = new List<MTable.SBone>();
+                        foreach (var sBone in lHand)
+                        {
+                            if (sBone.First == rightValue || sBone.First == leftValue ||
+                                sBone.Second == rightValue || sBone.Second == leftValue)
+                                suitableHand.Add(sBone);
+                        }
+                        
+                        Random r = new Random();
+                        sb = suitableHand[r.Next(0, suitableHand.Count)];
+                    }
+                }
+            }
+
             return true;
 
+        }
+        
+         
+        static public List<int> FillListWithValues(List<MTable.SBone> list)
+        {
+            List<int> numbers = new List<int>(list.Count*2);
+            foreach (var sBone in list)
+            {
+                numbers.Add(sBone.First);
+                numbers.Add(sBone.Second);
+            }
+
+            return numbers;
         }
 
     }

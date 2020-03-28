@@ -14,9 +14,6 @@ namespace Domino
         // Значения, за которыми соперник ходит на базар
         static private List<int> nopeValues;
         
-        // Отсортированная рука по сумме очков
-        static public List<MTable.SBone> newHand = SortHand(lHand);
-
         #region NotTouchFuncs
 
         // инициализация игрока
@@ -38,12 +35,14 @@ namespace Domino
         // сделать ход
         static public bool MakeStep(out MTable.SBone sb, out bool End)
         {
-            newHand = SortHand(lHand); 
-            numbersInHand = FillListWithValues(lHand);
-            numbersInTable = FillListWithValues(MTable.GetGameCollection());
-            freqNumInhand = FillDictWithFreqOfValues(lHand, numbersInHand);
-            freqNumInTable = FillDictWithFreqOfValues(MTable.GetGameCollection(), numbersInTable);
+            List<MTable.SBone> newHand = SortHand(lHand);
+            List<int> numbersInHand = FillListWithValues(lHand);
+            Dictionary<int, int> freqNumInhand = FillDictWithFreqOfValues(lHand, numbersInHand);
+            List<int> numbersInTable = FillListWithValues(MTable.GetGameCollection());
             
+            // Создаем и заполняем словарь количества значений у нас на столе
+            Dictionary<int, int> freqNumInTable = FillDictWithFreqOfValues(MTable.GetGameCollection(), numbersInTable);
+
             sb = lHand.First();
             End = true;
                         
@@ -66,7 +65,7 @@ namespace Domino
             // Первый ход (если мы ходим первые)
             if (tableCondition.Count == 0)
             {
-                sb = GetBoneOnZeroTurn(newHand);
+                sb = GetBoneOnZeroTurn(newHand, freqNumInTable);
                 lHand.Remove(sb);
             }
 
@@ -98,18 +97,18 @@ namespace Domino
                             {
                                 lHand.Add(newSBone);
                                 numbersInHand = FillListWithValues(lHand);
+                                sb = lHand.Last();
+                                lHand.Remove(sb);
                                 return true;
                             }
                     
                             // Если нет, то пропускаем ход
                             if (!MTable.GetFromShop(out newSBone))
                             {
+                                sb = lHand.First();
                                 return false;
                             }
                         }
-
-                        sb = lHand.Last();
-                        lHand.Remove(sb);
                     }
                     
                     // Можем походить 
@@ -123,58 +122,66 @@ namespace Domino
                                 sBone.Second == rightValue || sBone.Second == leftValue)
                                 suitableHand1.Add(sBone);
                         }
-                        
-                        // Словарь с повторениями на подходящей руке
-                        Dictionary<int, int> dictFreqSuitHand =
-                            FillDictWithFreqOfValues(suitableHand1, FillListWithValues(suitableHand1));
-                        
-                        var sortedFreqDict = (from entry in dictFreqSuitHand 
-                            orderby entry.Value ascending select entry);
 
-                        List<int> sortedListOfFreq = new List<int>();
-                        foreach (var kvp in sortedFreqDict)
+                        if (suitableHand1.Count == 1)
                         {
-                            sortedListOfFreq.Add(kvp.Key);
+                            sb = suitableHand1[0];
                         }
-                        
-                        // Самое популярное значение на руке
-                        int mostfreq = sortedListOfFreq[0];
-                        
-                        // Второе самое популярное значение на руке
-                        int preMostFreq = sortedListOfFreq[1];
 
-                        
-                        // Выкидываем доминошку с макс суммой
-                        // И которая повторяется больше (или почти больше) всех 
-                        // И так, чтобы у нас на руке остались выкидываемые значения
-                        foreach (var sBone in suitableHand1)
+                        if (suitableHand1.Count > 1)
                         {
-                            if (sBone.First == mostfreq || sBone.First == preMostFreq )
-                            {
-                                if (freqNumInhand[sBone.Second] > 1)
-                                {
-                                    sb = sBone;
-                                    break;
-                                }
-                                
-                            }
+                            // Словарь с повторениями на подходящей руке
+                            Dictionary<int, int> dictFreqSuitHand =
+                                FillDictWithFreqOfValues(suitableHand1, FillListWithValues(suitableHand1));
+                            
+                            var sortedFreqDict = (from entry in dictFreqSuitHand 
+                                orderby entry.Value ascending select entry);
 
-                            if (sBone.Second == mostfreq || sBone.Second == preMostFreq)
+                            List<int> sortedListOfFreq = new List<int>();
+                            foreach (var kvp in sortedFreqDict)
                             {
-                                if (freqNumInhand[sBone.First] > 1)
-                                {
-                                    sb = sBone;
-                                    break;
-                                }
+                                sortedListOfFreq.Add(kvp.Key);
                             }
                             
+                            // Самое популярное значение на руке
+                            int mostfreq = sortedListOfFreq[0];
+                            
+                            // Второе самое популярное значение на руке
+                            int preMostFreq = sortedListOfFreq[1];
+
+                            
+                            // Выкидываем доминошку с макс суммой
+                            // И которая повторяется больше (или почти больше) всех 
+                            // И так, чтобы у нас на руке остались выкидываемые значения
+                            foreach (var sBone in suitableHand1)
+                            {
+                                if (sBone.First == mostfreq || sBone.First == preMostFreq )
+                                {
+                                    if (freqNumInhand[sBone.Second] > 1)
+                                    {
+                                        sb = sBone;
+                                        break;
+                                    }
+                                    
+                                }
+
+                                if (sBone.Second == mostfreq || sBone.Second == preMostFreq)
+                                {
+                                    if (freqNumInhand[sBone.First] > 1)
+                                    {
+                                        sb = sBone;
+                                        break;
+                                    }
+                                }
                                 
+                                    
+                            }
+
+                            sb = suitableHand1[0];
                         }
-                        
+
                     }
-                    
-                    
-                    
+
                 }
                 
                 // Несколько доминошек на столе
@@ -228,18 +235,18 @@ namespace Domino
                             {
                                 lHand.Add(newSBone);
                                 numbersInHand = FillListWithValues(lHand);
+                                sb = lHand.Last();
+                                lHand.Remove(sb);
                                 return true;
                             }
                     
                             // Если нет, то пропускаем ход
                             if (!MTable.GetFromShop(out newSBone))
                             {
+                                sb = lHand.Last();
                                 return false;
                             }
                         }
-
-                        sb = lHand.Last();
-                        lHand.Remove(sb);
                     }
                     
                     // Можем походить 
@@ -254,11 +261,130 @@ namespace Domino
                                 suitableHand.Add(sBone);
                         }
 
-                        foreach (var sBone in suitableHand)
+                        // Если у нас в принципе 1 подходящая доминошка
+                        if (suitableHand.Count == 1)
                         {
+                            sb = suitableHand[0];
+                        }
+                        
+                        if (suitableHand.Count > 1)
+                        {
+                            // Делаем ход в начале игры и в середине (на столе меньше 13 доминошек)
+                            // Мы хотим избавиться от повторений (просто освобождаем руку)
+                            if (tableCondition.Count < 13)
+                            {
+                                // Словарь с повторениями на подходящей руке
+                                Dictionary<int, int> dictFreqSuitHand =
+                                    FillDictWithFreqOfValues(suitableHand, FillListWithValues(suitableHand));
+                                
+                                var sortedFreqDict = (from entry in dictFreqSuitHand 
+                                    orderby entry.Value ascending select entry);
+
+                                List<int> sortedListOfFreq = new List<int>();
+                                foreach (var kvp in sortedFreqDict)
+                                {
+                                    sortedListOfFreq.Add(kvp.Key);
+                                }
+                                
+                                // Самое популярное значение на руке
+                                int mostfreq = sortedListOfFreq[0];
+                                
+                                
+                                // Выкидываем доминошку с макс суммой
+                                // И которая повторяется больше всех 
+                                // И так, чтобы у нас на руке остались выкидываемые значения
+                                foreach (var sBone in suitableHand)
+                                {
+                                    if (sBone.First == mostfreq || sBone.Second == mostfreq)
+                                    {
+                                        if (sBone.First == mostfreq)
+                                        {
+                                            if (freqNumInhand[sBone.Second] > 1)
+                                            {
+                                                sb = sBone;
+                                                break;
+                                            }
+
+                                            if (nopeValues.Contains(sBone.Second) || 
+                                                (freqNumInhand[sBone.Second] + freqNumInTable[sBone.Second]) >= 4)
+                                            {
+                                                sb = sBone;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        if (sBone.Second == mostfreq)
+                                        {
+                                            if (freqNumInhand[sBone.First] > 1)
+                                            {
+                                                sb = sBone;
+                                                break;
+                                            }
+                                            
+                                            if (nopeValues.Contains(sBone.First) || 
+                                                (freqNumInhand[sBone.First] + freqNumInTable[sBone.First]) >= 4)
+                                            {
+                                                sb = sBone;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        
+                                        
+                                    }
+
+                                
+                                
+                                    
+                            }
+                            }
+
+                            // Конец игры -- мы хотим заставить соперника взять из базара
+                            if (tableCondition.Count >= 13)
+                            {
+                                // Если не можем соперника заставить пойти на базар
+                                foreach (var sBone in suitableHand)
+                                {
+                                    // Словарь с повторениями на подходящей руке
+                                    Dictionary<int, int> dictFreqSuitHand =
+                                        FillDictWithFreqOfValues(suitableHand, FillListWithValues(suitableHand));
+                                
+                                    var sortedFreqDict = (from entry in dictFreqSuitHand 
+                                        orderby entry.Value ascending select entry);
+
+                                    List<int> sortedListOfFreq = new List<int>();
+                                    foreach (var kvp in sortedFreqDict)
+                                    {
+                                        sortedListOfFreq.Add(kvp.Key);
+                                    }
+                                
+                                    // Самое популярное значение на руке
+                                    int mostfreq = sortedListOfFreq[0];
+
+                                    if (sBone.Second == mostfreq || sBone.First == mostfreq)
+                                    {
+                                        sb = sBone;
+                                        break;
+                                    }
+                                }
+                                
+                                foreach (var sBone in suitableHand)
+                                {
+                                    if (nopeValues.Contains(sBone.First) || nopeValues.Contains(sBone.Second) ||
+                                        (freqNumInhand[sBone.First] + freqNumInTable[sBone.First]) >= 5 ||
+                                        (freqNumInhand[sBone.Second] + freqNumInTable[sBone.Second]) >= 5 )
+                                    {
+                                        sb = sBone;
+                                        break;
+                                    }
+                                }
+                                
+                                
+                            }
+                            
                             // Если кол-во очков на базаре и на руке у соперника 
                             // Больше, чем у нас, то вынудим соперника взять весь базар
-                            if (193 - GetScoreFromHand() + GetScoreFromTable() < GetScoreFromHand() + GetScoreFromTable())
+                            if (193 - GetScore() + GetScoreFromTable() < GetScore() + GetScoreFromTable())
                             {
                                 // Список всех значений на столе и на нашей руке
                                 List<int> FullListOfValues = numbersInHand.Concat(numbersInTable).ToList();
@@ -278,68 +404,31 @@ namespace Domino
                                         mostFreqList.Add(kvp.Key);
                                 }
 
-                                // Проверяем можем ли положить доминошку с такими значениями,
-                                // Которых больше всего на столе и у нас на руке 
-                                if ((sBone.First == rightValue && mostFreqList.Contains(sBone.Second) &&
-                                     sBone.Second == leftValue) ||
-                                    (sBone.Second == rightValue && mostFreqList.Contains(sBone.First) &&
-                                     sBone.First == leftValue) ||
-                                    (sBone.First == leftValue && mostFreqList.Contains(sBone.Second) &&
-                                     sBone.Second == rightValue) ||
-                                    (sBone.Second == leftValue && mostFreqList.Contains(sBone.First) &&
-                                     sBone.First == rightValue))
+                                foreach (var sBone in suitableHand)
                                 {
-                                    // ВОЗВРАЩАЕМ ДОМИНОШКУ
+                                    // Проверяем можем ли положить доминошку с такими значениями,
+                                    // Которых больше всего на столе и у нас на руке 
+                                    if ((sBone.First == rightValue && mostFreqList.Contains(sBone.Second) &&
+                                         sBone.Second == leftValue) ||
+                                        (sBone.Second == rightValue && mostFreqList.Contains(sBone.First) &&
+                                         sBone.First == leftValue) ||
+                                        (sBone.First == leftValue && mostFreqList.Contains(sBone.Second) &&
+                                         sBone.Second == rightValue) ||
+                                        (sBone.Second == leftValue && mostFreqList.Contains(sBone.First) &&
+                                         sBone.First == rightValue))
+                                    {
+                                        sb = sBone;
+                                        break;
+                                    }
                                 }
+                                
                             
                         
-                            }    
-                    
-                    
+                            } 
                             
-                            // Если мы знаем что соперник ходил на базар
-                            if (nopeValues.Count != 0)
-                            {
-                                // Первая часть доминошки соединяется со столом и вторая часть -- значение, которого нет у соперника
-                                if (sBone.First == leftValue || sBone.First == rightValue)
-                                {
-                                    if (nopeValues.Contains(sBone.Second))
-                                    {
-
-                                    }
-                                }
-
-                                // Вторая часть доминошки соединяется со столом и первая часть -- значение, которого нет у соперника
-                                if (sBone.Second == leftValue || sBone.Second == rightValue)
-                                {
-                                    if (nopeValues.Contains(sBone.First))
-                                    {
-
-                                    }
-                                }
-                            }
-
-                            // Соперник не ходил на базар
-                            if (nopeValues.Count == 0)
-                            {
-                                
-                                
-                                // Не в конце игры (когда базар еще не пустой)
-                                // Есть ли на руках доминошка, которую можем положить на оба конца, то мы ее кладем
-                                // Какой стороной кладем?
-                                // 1) Постараться положить так, чтобы на концах были значения, которые у нас есть 
-                                // 2) Логика с кол-м значений в игре
-                                
-                                // Конец игры
-                                
-                            }
                         }
-                
                     }
-
                 }
-
-
             }
 
             countBonesInShop = MTable.GetShopCount();
@@ -362,7 +451,7 @@ namespace Domino
         }
         
         // Ставим доминошку с максимальной суммой и еще числа которой повторяются на нулевой ход
-        static public MTable.SBone GetBoneOnZeroTurn(List<MTable.SBone> newHand)
+        static public MTable.SBone GetBoneOnZeroTurn(List<MTable.SBone> newHand, Dictionary<int, int> freqNumInTable)
         {
             MTable.SBone s = newHand[0];
             foreach (var sBone in newHand)
@@ -395,7 +484,7 @@ namespace Domino
         }
 
         // дать сумму очков на руке
-        static public int GetScoreFromHand()
+        static public int GetScore()
         {
             int sum = 0;
             
@@ -426,18 +515,6 @@ namespace Domino
         // Значения на краях стола
         static public int rightValue;
         static public int leftValue;
-        
-        // Создаем и заполняем список всех значений на руке
-        static public List<int> numbersInHand = FillListWithValues(lHand);
-
-        // Создаем и заполняем словарь количества значений у нас на руке
-        static public Dictionary<int, int> freqNumInhand = FillDictWithFreqOfValues(lHand, numbersInHand);
-        
-        // Создаем и заполняем список всех значений на столе
-        static public List<int> numbersInTable = FillListWithValues(MTable.GetGameCollection());
-        
-        // Создаем и заполняем словарь количества значений у нас на столе
-        static public Dictionary<int, int> freqNumInTable = FillDictWithFreqOfValues(MTable.GetGameCollection(), numbersInTable);
         
         static public List<int> FillListWithValues(List<MTable.SBone> list)
         {
@@ -481,7 +558,7 @@ namespace Domino
             return hand;
         }
 
-        static public int countBonesInShop;
+        static public int countBonesInShop = 13;
 
         #endregion
 

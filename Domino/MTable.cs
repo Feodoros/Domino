@@ -292,7 +292,7 @@ namespace Domino
                             return;
                         }
                     }
-                        // если ход не сделан
+                    // если ход не сделан
                     else if(intBoneyard == lBoneyard.Count && intBoneyard > 0)
                     {
                         Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + MSPlayer.PlayerName);
@@ -324,7 +324,7 @@ namespace Domino
         while(efFinish == EFinish.Play);
         // результат текущей игры
         Console.WriteLine(arrFinishMsg[(int) efFinish]);
-        Console.WriteLine("СЧЕТ -- " + MFPlayer.GetScore() + ":" + MSPlayer.GetScoreFromHand());
+        Console.WriteLine("СЧЕТ -- " + MFPlayer.GetScore() + ":" + MSPlayer.GetScore());
         Console.ReadLine();
         }
     }
