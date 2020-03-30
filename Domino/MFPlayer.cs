@@ -128,6 +128,7 @@ namespace Domino
 
                         Random r = new Random();
                         sb = suitableHand1[r.Next(0, suitableHand1.Count)];
+                        lHand.Remove(sb);
                     }
                 }
 
@@ -138,37 +139,10 @@ namespace Domino
                     // Доминошки на концах цепочки
                     MTable.SBone sLeft = tableCondition[0];
                     MTable.SBone sRight = tableCondition[tableCondition.Count - 1];
+                    
 
-                    // Доминошки предыдущие за последними
-                    MTable.SBone sLeftNext = tableCondition[1];
-                    MTable.SBone sPreRight = tableCondition[tableCondition.Count - 2];
-
-                    int leftValue = -1;
-                    int rightValue = -1;
-                    // Левые 2 последние доминошки соеденены First'ом
-                    if (sLeftNext.First == sLeft.First)
-                    {
-                        leftValue = sLeft.Second;
-                    }
-
-                    // Левые 2 последние доминошки соеденены Second'ом
-                    if (sLeftNext.Second == sLeft.Second)
-                    {
-                        leftValue = sLeft.First;
-                    }
-
-
-                    // Правые 2 последние доминошки соеденены First'ом
-                    if (sPreRight.First == sRight.First)
-                    {
-                        rightValue = sRight.Second;
-                    }
-
-                    // Правые 2 последние доминошки соеденены Second'ом
-                    if (sPreRight.Second == sRight.Second)
-                    {
-                        rightValue = sRight.First;
-                    }
+                    int leftValue = sLeft.First;
+                    int rightValue = sRight.Second;
                     
                     
                     // Если мы не можем походить, то обращаемся к базару
@@ -213,6 +187,7 @@ namespace Domino
                         
                         Random r = new Random();
                         sb = suitableHand[r.Next(0, suitableHand.Count)];
+                        lHand.Remove(sb);
                     }
                 }
             }
