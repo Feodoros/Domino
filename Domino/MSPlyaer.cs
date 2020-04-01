@@ -288,14 +288,12 @@ namespace Domino
                         // Самый конец игры:
                         // Заставляю ходить на базар без проверки, что у меня такие элементы останутся
 
-                        
-                        
-                        
-                        // Делаем ход в начале игры и в середине (на столе меньше 13 доминошек)
-                        // Мы хотим избавиться от повторений (просто освобождаем руку)
-                        if (tableCondition.Count < 13)
+                        // У меня и у соперника <= 3 доминошек на руке
+                        bool ifEndGame = lHand.Count <= 3 && enemyBoneCount <= 3;
+
+                        // Середины игры
+                        if (!ifEndGame)
                         {
-                            
                             // Частота значений на руке
                             var sortedFreqDict = (from entry in freqNumInHand 
                                 orderby entry.Value descending select entry);
@@ -348,7 +346,9 @@ namespace Domino
                             // Выкидываем доминошку с макс суммой
                             // И которая повторяется больше всех (у нас на руке)
                             // И так, чтобы у нас на руке остались выкидываемые значения
-                            // Если все вторые половинки только в одном экземпляре,
+                            // Если все вторые половинки только в одном экземпляре, 
+                            // То заставляем соперника пойти на базар
+                            // Если не можем, 
                             // То выкидываем доминошку со второй половиной самой популярной на столе
                             if (!oneRepeatValue)
                             {
@@ -362,7 +362,6 @@ namespace Domino
                                             sb = sBone;
                                             break;
                                         }
-                                        
                                     }
                                 }
                             }
@@ -370,19 +369,72 @@ namespace Domino
                             // Вторые половинки в одном экземпляре
                             if (oneRepeatValue)
                             {
-                                sortedListOfFreqTable.Reverse();
-                                foreach (var value in sortedListOfFreqTable)
+                                // Можем заставить пойти на базар
+                                if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count != 0)
                                 {
                                     foreach (var sBone in suitableHand)
                                     {
-                                        if (sBone.First == value || sBone.Second == value)
+                                        if (leftValue == sBone.First && nopeValues.Contains(sBone.Second))
                                         {
                                             sb = sBone;
                                             break;
                                         }
+                                        
+                                        if (rightValue == sBone.First && nopeValues.Contains(sBone.Second))
+                                        {
+                                            sb = sBone;
+                                            break;
+                                        }
+                                        
+                                        if (leftValue == sBone.Second && nopeValues.Contains(sBone.First))
+                                        {
+                                            sb = sBone;
+                                            break;
+                                        }
+                                        
+                                        if (rightValue == sBone.Second && nopeValues.Contains(sBone.First))
+                                        {
+                                            sb = sBone;
+                                            break;
+                                        }
+                                            
                                     }
                                 }
+
+                                // Не можем заставить пойти на базар, т.о.
+                                // Смотрим на стол
+                                if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count == 0)
+                                {
+                                    sortedListOfFreqTable.Reverse();
+                                    foreach (var value in sortedListOfFreqTable)
+                                    {
+                                        foreach (var sBone in suitableHand)
+                                        {
+                                            if (sBone.First == value || sBone.Second == value)
+                                            {
+                                                sb = sBone;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                
                             }
+                        }
+                            
+                        
+
+                        // Конец игры
+                        if (ifEndGame)
+                        {
+                            
+                        }
+                        
+                        // Делаем ход в начале игры и в середине (на столе меньше 13 доминошек)
+                        // Мы хотим избавиться от повторений (просто освобождаем руку)
+                        if (tableCondition.Count < 13)
+                        {
+                            
                             
                             
                             // Выкидываем доминошку с макс суммой
