@@ -682,7 +682,15 @@ namespace Domino
             List<int> numbers = new List<int>(list.Count*2);
             foreach (var sBone in list)
             {
-               
+                if (sBone.First == sBone.Second)
+                {
+                    numbers.Add(sBone.First);
+                }
+                else
+                {
+                    numbers.Add(sBone.First);
+                    numbers.Add(sBone.Second);
+                }
                 
             }
 
@@ -727,7 +735,6 @@ namespace Domino
         #endregion
 
         // TODO
-        // Взятие из базара -- Баг
         // Работа с дублями -- обдумать + Баг с частотой
         // В Main Баг с SetBone()
     }
