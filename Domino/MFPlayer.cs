@@ -43,14 +43,15 @@ namespace Domino
             {
                 if (lHand[0].First == 0 && lHand[0].Second == 0)
                     sum = 25;
+                else 
+                    sum = lHand[0].First + lHand[0].Second;
             }
 
             else
             {
                 foreach (var sBone in lHand)
                 {
-                    sum += sBone.First;
-                    sum += sBone.Second;
+                    sum += sBone.First + sBone.Second;
                 }
                 
             }
