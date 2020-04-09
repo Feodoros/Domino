@@ -228,30 +228,36 @@ namespace Domino
                 {
                     while (checkHand)
                     {
-                        checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
                         // Проверяем есть ли доминошки в базаре,
                         // Если есть, то берем
                         MTable.SBone newSBone;
-                        if (MTable.GetFromShop(out newSBone))
+                        bool emptyShop = MTable.GetFromShop(out newSBone);
+                        if (emptyShop)
                         {
                             lHand.Add(newSBone);
                             numbersInHand = FillListWithValues(lHand);
-                            sb = lHand.Last();
-                            lHand.Remove(sb);
-                            return true;
+                            checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+                            if (!checkHand)
+                            {
+                                sb = lHand.Last();
+                                lHand.Remove(sb);
+                                return true;
+                            }
+                                
                         }
-                
+                    
                         // Если нет, то пропускаем ход
-                        if (!MTable.GetFromShop(out newSBone))
+                        if (!emptyShop)
                         {
                             sb = lHand.Last();
                             return false;
                         }
+                            
                     }
                 }
                 
                 // Можем походить 
-                if(!checkHand)
+                else
                 {
                     // Отсортированная рука по сумме и с подходящеми доминошками (чем можем походить)
                     List<MTable.SBone> suitableHand = new List<MTable.SBone>();
@@ -265,11 +271,11 @@ namespace Domino
                     // 1 подходящая доминошка
                     if (suitableHand.Count == 1)
                     {
-                        sb = suitableHand[0];
+                         sb = suitableHand[0];
                     }
                     
                     // Несколько подходящих доминошек
-                    if (suitableHand.Count > 1)
+                    else
                     {
                         // Частота значений на руке
                         var sortedFreqDict = (from entry in freqNumInHand 
@@ -316,7 +322,7 @@ namespace Domino
                         }
 
                         // Все вторые половинки в одном экземпляре
-                        bool oneRepeatValue = checkFreqValues.Contains(false);
+                        bool oneRepeatValue = !checkFreqValues.Contains(false);
                         
                         // У меня и у соперника <= 3 доминошек на руке
                         bool ifEndGame = lHand.Count <= 3 && enemyBoneCount <= 3;
@@ -331,7 +337,7 @@ namespace Domino
                             // То заставляем соперника пойти на базар
                             // Если не можем, 
                             // То выкидываем доминошку со второй половиной самой популярной на столе
-                            if (oneRepeatValue)
+                            if (!oneRepeatValue)
                             {
                                 MTable.SBone zeroBone;
                                 zeroBone.First = 0;
@@ -342,10 +348,21 @@ namespace Domino
                                 {
                                     foreach (var sBone in suitableHand)
                                     {
-                                        if (sBone.First == value || sBone.Second == value)
+                                        if (sBone.First == rightValue || sBone.First == leftValue)
                                         {
-                                            sb = sBone;
-                                            break;
+                                            if (sBone.Second == value)
+                                            {
+                                                sb = sBone;
+                                                break;
+                                            }
+                                        }
+                                        if (sBone.Second == rightValue || sBone.Second == leftValue)
+                                        {
+                                            if (sBone.First == value)
+                                            {
+                                                sb = sBone;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -357,7 +374,7 @@ namespace Domino
                             }
                             
                             // Вторые половинки в одном экземпляре
-                            if (!oneRepeatValue)
+                            if (oneRepeatValue)
                             {
                                 // Можем заставить пойти на базар
                                 if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count != 0)

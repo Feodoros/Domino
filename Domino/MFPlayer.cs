@@ -145,26 +145,33 @@ namespace Domino
                     {
                         while (checkHand)
                         {
-                            checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
                             // Проверяем есть ли доминошки в базаре,
                             // Если есть, то берем
                             MTable.SBone newSBone;
-                            if (MTable.GetFromShop(out newSBone))
+                            bool emptyShop = MTable.GetFromShop(out newSBone);
+                            if (emptyShop)
                             {
                                 lHand.Add(newSBone);
                                 numbersInHand = FillListWithValues(lHand);
-                                sb = lHand.Last();
+                                checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+                                if (!checkHand)
+                                {
+                                    sb = lHand.Last();
+                                    lHand.Remove(sb);
+                                    return true;
+                                }
+                                
                             }
                     
                             // Если нет, то пропускаем ход
-                            if (!MTable.GetFromShop(out newSBone))
+                            if (!emptyShop)
                             {
                                 sb = lHand.Last();
                                 return false;
                             }
+                            
                         }
-                        lHand.Remove(sb);
-                        return true;
+                        
                     }
                     
                     // Можем походить 
