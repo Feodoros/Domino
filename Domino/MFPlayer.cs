@@ -67,12 +67,6 @@ namespace Domino
             sb = lHand.First();
             End = true;
             
-            if (MTable.GetGameCollection().Count == 0)
-            {
-                Random r = new Random();
-                sb = lHand[r.Next(0, lHand.Count)];
-            }
-
             if (MTable.GetGameCollection().Count >= 1)
             {
                 // 1 Доминошка на столе
@@ -160,8 +154,6 @@ namespace Domino
                                 lHand.Add(newSBone);
                                 numbersInHand = FillListWithValues(lHand);
                                 sb = lHand.Last();
-                                lHand.Remove(sb);
-                                return true;
                             }
                     
                             // Если нет, то пропускаем ход
@@ -171,6 +163,8 @@ namespace Domino
                                 return false;
                             }
                         }
+                        lHand.Remove(sb);
+                        return true;
                     }
                     
                     // Можем походить 

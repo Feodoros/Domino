@@ -331,7 +331,7 @@ namespace Domino
                             // То заставляем соперника пойти на базар
                             // Если не можем, 
                             // То выкидываем доминошку со второй половиной самой популярной на столе
-                            if (!oneRepeatValue)
+                            if (oneRepeatValue)
                             {
                                 MTable.SBone zeroBone;
                                 zeroBone.First = 0;
@@ -357,7 +357,7 @@ namespace Domino
                             }
                             
                             // Вторые половинки в одном экземпляре
-                            if (oneRepeatValue)
+                            if (!oneRepeatValue)
                             {
                                 // Можем заставить пойти на базар
                                 if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count != 0)
@@ -476,6 +476,69 @@ namespace Domino
                                 
                         }
 
+                        // Оборона (мы явно проигрываем)
+                        if (enemyBoneCount*2 <= lHand.Count)
+                        {
+                            // Можем заставить пойти на базар
+                            if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count != 0)
+                            {
+                                foreach (var sBone in suitableHand)
+                                {
+                                    if (leftValue == sBone.First && nopeValues.Contains(sBone.Second))
+                                    {
+                                        sb = sBone;
+                                        break;
+                                    }
+                                    
+                                    if (rightValue == sBone.First && nopeValues.Contains(sBone.Second))
+                                    {
+                                        sb = sBone;
+                                        break;
+                                    }
+                                    
+                                    if (leftValue == sBone.Second && nopeValues.Contains(sBone.First))
+                                    {
+                                        sb = sBone;
+                                        break;
+                                    }
+                                    
+                                    if (rightValue == sBone.Second && nopeValues.Contains(sBone.First))
+                                    {
+                                        sb = sBone;
+                                        break;
+                                    }
+                                        
+                                }
+                            }
+
+                            // Не можем заставить пойти на базар, т.о.
+                            // Смотрим на руку
+                            if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count == 0)
+                            {
+                                MTable.SBone zeroBone;
+                                zeroBone.First = 0;
+                                zeroBone.Second = 0;
+                                
+                                sortedListOfFreq.Reverse();
+                                foreach (var value in sortedListOfFreq)
+                                {
+                                    foreach (var sBone in suitableHand)
+                                    {
+                                        if (sBone.First == value || sBone.Second == value)
+                                        {
+                                            sb = sBone;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if (suitableHand.Contains(zeroBone))
+                                {
+                                    sb = zeroBone;
+                                }
+                            }
+                        }
+                        
                         // Если кол-во очков на базаре и на руке у соперника 
                         // Больше, чем у нас, то вынудим соперника взять весь базар
                         /*if (193 - GetScore() + GetScoreFromTable() < GetScore() + GetScoreFromTable())
@@ -608,7 +671,7 @@ namespace Domino
         #region Helpers
         
         // Значения, за которыми соперник ходит на базар
-        static private List<int> nopeValues;
+        static private List<int> nopeValues = new List<int>(){-1};
         
         // Значения на краях стола
         static public int rightValue;
@@ -619,8 +682,8 @@ namespace Domino
             List<int> numbers = new List<int>(list.Count*2);
             foreach (var sBone in list)
             {
-                numbers.Add(sBone.First);
-                numbers.Add(sBone.Second);
+               
+                
             }
 
             return numbers;
@@ -633,8 +696,11 @@ namespace Domino
 
             for (int i = 0; i < 7; i++)
             {
-                if(numbers.Contains(i))
+                if (numbers.Contains(i))
+                {
                     freqNum.Add(i, numbers.Where(x => x == i).ToList().Count);
+                }
+                    
             }
             
             return freqNum;
@@ -660,6 +726,10 @@ namespace Domino
 
         #endregion
 
+        // TODO
+        // Взятие из базара -- Баг
+        // Работа с дублями -- обдумать + Баг с частотой
+        // В Main Баг с SetBone()
     }
     
 }

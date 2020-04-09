@@ -152,8 +152,22 @@ namespace Domino
                     lGame.Add(sb);
                     return true;
                 }
+                
+                sbT = lGame[0];
+                if(sbT.First == sb.Second)
+                {   
+                    lGame.Insert(0, sb);
+                    return true;
+                }
+                else if (sbT.First == sb.First)
+                {
+                    sb.Exchange();
+                    lGame.Insert(0, sb);
+                    return true;
+                }
                 else
                     return false;
+                
             }
             else
             {
@@ -287,7 +301,7 @@ namespace Domino
                         // пристраиваем доминушку
                         if (SetBone(sb, blnEnd) == false)
                         {
-                            Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + MSPlayer.PlayerName);
+                            Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + sb.First + sb.Second + MSPlayer.PlayerName);
                             Console.ReadLine();
                             return;
                         }
@@ -295,7 +309,7 @@ namespace Domino
                     // если ход не сделан
                     else if(intBoneyard == lBoneyard.Count && intBoneyard > 0)
                     {
-                        Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + MSPlayer.PlayerName);
+                        Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + sb.First + sb.Second + MSPlayer.PlayerName);
                         Console.ReadLine();
                         return;
                     }
