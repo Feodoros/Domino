@@ -17,6 +17,8 @@ namespace Domino
         static public void Initialize()
         {
             lHand = new List<MTable.SBone>();
+            nopeValues = new List<int>(){-1};
+            countBonesInShop = 13;
         }
 
         // Вывод на экран
@@ -649,6 +651,46 @@ namespace Domino
                                 
             else
                 End = false;
+
+            if (tableCondition.Count > 1)
+            {
+                MTable.SBone sLeft;
+                MTable.SBone sRight;
+                
+                if (End)
+                {
+                    // Доминошки на концах цепочки
+                    sLeft = tableCondition[0];
+                    if (rightValue == sb.First)
+                    {
+                        rightValue = sb.Second;
+                    }
+                    else
+                    {
+                        rightValue = sb.First;
+                    }
+                    
+                    leftValue = sLeft.First;
+                    
+                }
+
+                else
+                {
+                    sRight = tableCondition.Last();
+                    if (leftValue == sb.First)
+                    {
+                        leftValue = sb.Second;
+                    }
+                    else
+                    {
+                        leftValue = sb.First;
+                    }
+                    
+                    rightValue = sRight.Second;
+                }
+                
+            }
+            
             
             return true;
         }
@@ -726,6 +768,7 @@ namespace Domino
                 // Если есть, то берем
                 MTable.SBone newSBone;
                 bool emptyShop = MTable.GetFromShop(out newSBone);
+                countBonesInShop--;
                 if (emptyShop)
                 {
                     lHand.Add(newSBone);
