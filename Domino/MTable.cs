@@ -183,7 +183,7 @@ namespace Domino
             int countWin_MS = 0;
             int countWin_MF = 0;
             
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 10; i++)
             {
                 // кто сейчас ходит
                 bool blnFirst;

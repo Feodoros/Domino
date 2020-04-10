@@ -30,7 +30,7 @@ namespace Domino
         #endregion
 
         // Сделать ход
-        static public bool MakeStep(out MTable.SBone sb, out bool End)
+        public static bool MakeStep(out MTable.SBone sb, out bool End)
         {
             List<MTable.SBone> newHand = SortHand(lHand);
             List<int> numbersInHand = FillListWithValues(lHand);
@@ -72,42 +72,8 @@ namespace Domino
                 bool checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
                 if (checkHand)
                 {
-                    while (checkHand)
-                    {
-                        // Проверяем есть ли доминошки в базаре,
-                        // Если есть, то берем
-                        MTable.SBone newSBone;
-                        bool emptyShop = MTable.GetFromShop(out newSBone);
-                        if (emptyShop)
-                        {
-                            lHand.Add(newSBone);
-                            numbersInHand = FillListWithValues(lHand);
-                            checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
-                            if (!checkHand)
-                            {
-                                
-                                sb = lHand.Last();
-                                lHand.Remove(sb);
-                                if (rightValue == sb.First || rightValue == sb.Second)
-                                    End = true;
-                                
-                                else
-                                    End = false;
-                                
-                                return true;
-                            }
-                                
-                        }
-                    
-                        // Если нет, то пропускаем ход
-                        if (!emptyShop)
-                        {
-                            sb = lHand.Last();
-                            End = true;
-                            return false;
-                        }
-                            
-                    }
+                    return GoToShop(out sb, out End);
+
                 }
                 
                 // Можем походить 
@@ -279,42 +245,8 @@ namespace Domino
                 bool checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
                 if (checkHand)
                 {
-                    while (checkHand)
-                    {
-                        // Проверяем есть ли доминошки в базаре,
-                        // Если есть, то берем
-                        MTable.SBone newSBone;
-                        bool emptyShop = MTable.GetFromShop(out newSBone);
-                        if (emptyShop)
-                        {
-                            lHand.Add(newSBone);
-                            numbersInHand = FillListWithValues(lHand);
-                            checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
-                            if (!checkHand)
-                            {
-                                
-                                sb = lHand.Last();
-                                lHand.Remove(sb);
-                                if (rightValue == sb.First || rightValue == sb.Second)
-                                    End = true;
-                                
-                                else
-                                    End = false;
-                                
-                                return true;
-                            }
-                                
-                        }
-                    
-                        // Если нет, то пропускаем ход
-                        if (!emptyShop)
-                        {
-                            sb = lHand.Last();
-                            End = true;
-                            return false;
-                        }
-                            
-                    }
+                    return GoToShop(out sb, out End);
+
                 }
                 
                 // Можем походить 
@@ -724,7 +656,7 @@ namespace Domino
         #region Logic
         
         // Подсчет кол-ва очков на столе и у себя в руке
-        static public int GetScoreFromTable()
+        public static int GetScoreFromTable()
         {
             int sum = 0;
             foreach (var sBone in MTable.GetGameCollection())
@@ -735,10 +667,9 @@ namespace Domino
 
             return sum;
         }
-        
-        
+
         // Запоминаем значения, за которыми проитивник ходит на базар
-        static public List<int> RememberNopeValues(List<int> nopeValues)
+        private static List<int> RememberNopeValues(List<int> nopeValues)
         {
             if (countBonesInShop != MTable.GetShopCount())
             {
@@ -749,14 +680,14 @@ namespace Domino
             return nopeValues;
         }
         
-        // добавить доминушку в свою руку
-        static public void AddItem(MTable.SBone sb)
+        // Добавить доминушку в свою руку
+        public static void AddItem(MTable.SBone sb)
         {
             lHand.Add(sb);
         }
 
-        // дать сумму очков на руке
-        static public int GetScore()
+        // Дать сумму очков на руке
+        public static int GetScore()
         {
             int sum = 0;
             
@@ -780,6 +711,60 @@ namespace Domino
             return sum;
         }
 
+        // Идем на базар
+        public static bool GoToShop(out MTable.SBone sb, out bool End)
+        {
+            sb = lHand.Last();
+            End = true;
+
+            List<int> numbersInHand = FillListWithValues(lHand);
+            
+            bool checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+            while (checkHand)
+            {
+                // Проверяем есть ли доминошки в базаре,
+                // Если есть, то берем
+                MTable.SBone newSBone;
+                bool emptyShop = MTable.GetFromShop(out newSBone);
+                if (emptyShop)
+                {
+                    lHand.Add(newSBone);
+                    numbersInHand = FillListWithValues(lHand);
+                    checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+                    if (!checkHand)
+                    {
+                                
+                        sb = lHand.Last();
+                        lHand.Remove(sb);
+                        if (rightValue == sb.First || rightValue == sb.Second)
+                            End = true;
+                                
+                        else
+                            End = false;
+                                
+                        return true;
+                    }
+
+                    else
+                    {
+                        sb = lHand.Last();
+                        End = true;
+                    }
+                                
+                }
+                    
+                // Если нет, то пропускаем ход
+                else
+                {
+                    sb = lHand.Last();
+                    End = true;
+                    return false;
+                }
+                            
+            }
+
+            return false;
+        }
         
         #endregion
         
