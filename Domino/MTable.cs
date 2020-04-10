@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Domino
 {
@@ -152,22 +153,8 @@ namespace Domino
                     lGame.Add(sb);
                     return true;
                 }
-                
-                sbT = lGame[0];
-                if(sbT.First == sb.Second)
-                {   
-                    lGame.Insert(0, sb);
-                    return true;
-                }
-                else if (sbT.First == sb.First)
-                {
-                    sb.Exchange();
-                    lGame.Insert(0, sb);
-                    return true;
-                }
                 else
                     return false;
-                
             }
             else
             {
@@ -190,156 +177,186 @@ namespace Domino
 
         static void Main(string[] args)
         {
-            // кто сейчас ходит
-            bool blnFirst;
-            // результат текущего хода игроков =TRUE, если ход состоялся
-            bool blnFRes, blnSRes;
-            // признак окончания игры
-            EFinish efFinish = EFinish.Play;
-            // сообщения о результате игры
-            string[] arrFinishMsg = {"---", "Победил первый игрок!", "Победил второй игрок!", "Рыба!"};
-            // количество доминушек в базаре, нужно для определения корректности хода игрока
-            int intBoneyard =0;
-            // Чем ходить
-            SBone sb;
-            // куда ходить
-            bool blnEnd;
-    
-            // Инициализация игры
-            Initialize();
-            // Раздача доминошек в начале игры
-            GetHands();
-            // первая доминушка - первая из базара
-            // определяем случайным образом доминушку из базара
-            int intN = rnd.Next(lBoneyard.Count - 1);
-            lGame.Add(lBoneyard[intN]);
-            lBoneyard.RemoveAt(intN);
-            // вывод на экран начального состояния игры
-            Console.WriteLine("*************ИГРА НАЧАЛАСЬ*********************");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine();
-            Console.WriteLine("*************Шаг #0");
-            Console.ForegroundColor = ConsoleColor.White;
-            PrintAll(lGame);
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("ИГРОК " + MFPlayer.PlayerName);
-            MFPlayer.PrintAll();
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("ИГРОК " + MSPlayer.PlayerName);
-            MSPlayer.PrintAll();
-            Console.ReadKey();
+            int sum_MS = 0;
+            int sum_MF = 0;
 
-            blnFRes = true;
-            blnSRes = true;
-            // Первым ходит первый игрок
-            blnFirst = false;
-        
-            intBoneyard = lBoneyard.Count;
-            //-----------------------------------------------------------------
-            // ИГРА
-            do
+            int countWin_MS = 0;
+            int countWin_MF = 0;
+            
+            for (int i = 0; i < 20; i++)
             {
+                // кто сейчас ходит
+                bool blnFirst;
+                // результат текущего хода игроков =TRUE, если ход состоялся
+                bool blnFRes, blnSRes;
+                // признак окончания игры
+                EFinish efFinish = EFinish.Play;
+                // сообщения о результате игры
+                string[] arrFinishMsg = {"---", "Победил первый игрок!", "Победил второй игрок!", "Рыба!"};
+                // количество доминушек в базаре, нужно для определения корректности хода игрока
+                int intBoneyard =0;
+                // Чем ходить
+                SBone sb;
+                // куда ходить
+                bool blnEnd;
+        
+                // Инициализация игры
+                Initialize();
+                // Раздача доминошек в начале игры
+                GetHands();
+                // первая доминушка - первая из базара
+                // определяем случайным образом доминушку из базара
+                int intN = rnd.Next(lBoneyard.Count - 1);
+                lGame.Add(lBoneyard[intN]);
+                lBoneyard.RemoveAt(intN);
+                // вывод на экран начального состояния игры
+                Console.WriteLine("*************ИГРА НАЧАЛАСЬ*********************");
                 Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine();
+                Console.WriteLine("*************Шаг #0");
                 Console.ForegroundColor = ConsoleColor.White;
+                PrintAll(lGame);
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("ИГРОК " + MFPlayer.PlayerName);
+                MFPlayer.PrintAll();
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("ИГРОК " + MSPlayer.PlayerName);
+                MSPlayer.PrintAll();
+                //Console.ReadKey();
 
-                // кто ходит? ---- Ходит первый игрок
-                if (blnFirst)
+                blnFRes = true;
+                blnSRes = true;
+                // Первым ходит первый игрок
+                blnFirst = false;
+            
+                intBoneyard = lBoneyard.Count;
+                //-----------------------------------------------------------------
+                // ИГРА
+                do
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine();
-                    Console.WriteLine("*************Шаг #" + intGameStep + " " + MFPlayer.PlayerName);
                     Console.ForegroundColor = ConsoleColor.White;
-                    // количество взятых доминушек
-                    intLastTaken = intTaken;
-                    intTaken = 0;
-                    // ход первого игрока
-                    intBoneyard = lBoneyard.Count;
-                    blnFRes = MFPlayer.MakeStep(out sb, out blnEnd);
-                    // если ход сделан
-                    if (blnFRes)
+
+                    // кто ходит? ---- Ходит первый игрок
+                    if (blnFirst)
                     {
-                        // пристраиваем доминушку
-                        if (SetBone(sb, blnEnd) == false)
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine();
+                        Console.WriteLine("*************Шаг #" + intGameStep + " " + MFPlayer.PlayerName);
+                        Console.ForegroundColor = ConsoleColor.White;
+                        // количество взятых доминушек
+                        intLastTaken = intTaken;
+                        intTaken = 0;
+                        // ход первого игрока
+                        intBoneyard = lBoneyard.Count;
+                        blnFRes = MFPlayer.MakeStep(out sb, out blnEnd);
+                        // если ход сделан
+                        if (blnFRes)
+                        {
+                            // пристраиваем доминушку
+                            if (SetBone(sb, blnEnd) == false)
+                            {
+                                Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + MFPlayer.PlayerName);
+                                Console.ReadLine();
+                                return;
+                            }
+                        }
+                        // если ход не сделан
+                        else if(intBoneyard == lBoneyard.Count && intBoneyard > 0)
                         {
                             Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + MFPlayer.PlayerName);
                             Console.ReadLine();
                             return;
                         }
-                    }
-                    // если ход не сделан
-                    else if(intBoneyard == lBoneyard.Count && intBoneyard > 0)
-                    {
-                        Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + MFPlayer.PlayerName);
-                        Console.ReadLine();
-                        return;
-                    }
 
-                    if (blnFRes == false && blnSRes == false)
-                    // рыба
-                        efFinish = EFinish.Lockdown;
-                    else if (blnFRes == true)
-                        // если нет домино, то я выиграл
-                        if (MFPlayer.GetCount() == 0) efFinish = EFinish.First;
-                }
-                // кто ходит? ---- Ходит вторый игрок
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine();
-                    Console.WriteLine("*************Шаг #" + intGameStep + " " + MSPlayer.PlayerName);
-                    Console.ForegroundColor = ConsoleColor.White;
-
-                    // количество взятых доминушек
-                    intLastTaken = intTaken;
-                    intTaken = 0;
-                    // ход первого игрока
-                    intBoneyard = lBoneyard.Count;
-                    blnSRes = MSPlayer.MakeStep(out sb, out blnEnd);
-                    // если ход сделан
-                    if (blnSRes)
+                        if (blnFRes == false && blnSRes == false)
+                        // рыба
+                            efFinish = EFinish.Lockdown;
+                        else if (blnFRes == true)
+                            // если нет домино, то я выиграл
+                            if (MFPlayer.GetCount() == 0) efFinish = EFinish.First;
+                    }
+                    // кто ходит? ---- Ходит вторый игрок
+                    else
                     {
-                        // пристраиваем доминушку
-                        if (SetBone(sb, blnEnd) == false)
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine();
+                        Console.WriteLine("*************Шаг #" + intGameStep + " " + MSPlayer.PlayerName);
+                        Console.ForegroundColor = ConsoleColor.White;
+
+                        // количество взятых доминушек
+                        intLastTaken = intTaken;
+                        intTaken = 0;
+                        // ход первого игрока
+                        intBoneyard = lBoneyard.Count;
+                        blnSRes = MSPlayer.MakeStep(out sb, out blnEnd);
+                        // если ход сделан
+                        if (blnSRes)
+                        {
+                            // пристраиваем доминушку
+                            if (SetBone(sb, blnEnd) == false)
+                            {
+                                Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + sb.First + sb.Second + MSPlayer.PlayerName);
+                                Console.ReadLine();
+                                return;
+                            }
+                        }
+                        // если ход не сделан
+                        else if(intBoneyard == lBoneyard.Count && intBoneyard > 0)
                         {
                             Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + sb.First + sb.Second + MSPlayer.PlayerName);
                             Console.ReadLine();
                             return;
                         }
-                    }
-                    // если ход не сделан
-                    else if(intBoneyard == lBoneyard.Count && intBoneyard > 0)
-                    {
-                        Console.WriteLine("!!!!!!!!Жульничаем!!!!!! " + sb.First + sb.Second + MSPlayer.PlayerName);
-                        Console.ReadLine();
-                        return;
-                    }
 
-                    if (blnFRes == false && blnSRes == false)
-                        // рыба
-                        efFinish = EFinish.Lockdown;
-                    else if (blnSRes == true)
-                        // если нет домино, то я выиграл
-                        if (MSPlayer.GetCount() == 0) efFinish = EFinish.First;
+                        if (blnFRes == false && blnSRes == false)
+                            // рыба
+                            efFinish = EFinish.Lockdown;
+                        else if (blnSRes == true)
+                            // если нет домино, то я выиграл
+                            if (MSPlayer.GetCount() == 0) efFinish = EFinish.First;
+                    }
+                 
+                    // после хода вывести данные на столе--------------------------------------------------------
+                    PrintAll(lGame);
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("ИГРОК " + MFPlayer.PlayerName);
+                    MFPlayer.PrintAll();
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.WriteLine("ИГРОК " + MSPlayer.PlayerName);
+                    MSPlayer.PrintAll();
+                    //Console.ReadKey()
+                    // будет ходить другой игрок
+                    blnFirst = ! blnFirst;
+                    intBoneyard = lBoneyard.Count;
+                    intGameStep += 1;
                 }
-            // после хода вывести данные на столе--------------------------------------------------------
-            PrintAll(lGame);
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("ИГРОК " + MFPlayer.PlayerName);
-            MFPlayer.PrintAll();
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("ИГРОК " + MSPlayer.PlayerName);
-            MSPlayer.PrintAll();
-            //Console.ReadKey()
-            // будет ходить другой игрок
-            blnFirst = ! blnFirst;
-            intBoneyard = lBoneyard.Count;
-            intGameStep += 1;
-        }
-        while(efFinish == EFinish.Play);
-        // результат текущей игры
-        Console.WriteLine(arrFinishMsg[(int) efFinish]);
-        Console.WriteLine("СЧЕТ -- " + MFPlayer.GetScore() + ":" + MSPlayer.GetScore());
-        Console.ReadLine();
+                while(efFinish == EFinish.Play);
+                // результат текущей игры
+                Console.WriteLine(arrFinishMsg[(int) efFinish]);
+                Console.WriteLine("СЧЕТ -- " + MFPlayer.GetScore() + ":" + MSPlayer.GetScore());
+                
+                sum_MF += MFPlayer.GetScore();
+                sum_MS += MSPlayer.GetScore();
+
+                //if ((int) efFinish != 3)
+                //{
+                if (MFPlayer.GetScore() > MSPlayer.GetScore())
+                {
+                    countWin_MS++;
+                }
+                else
+                    countWin_MF++;
+                //}
+                
+                
+            }
+            
+            Console.WriteLine("Бывалый победил {0} раз.", countWin_MS);
+            Console.WriteLine("Балбес победил {0} раз.", countWin_MF);
+            Console.WriteLine("Итоговый счет // Бывалый -- {0} : Балбес -- {1} //", sum_MS, sum_MF);
+            Console.ReadLine();
+            
         }
     }
 }

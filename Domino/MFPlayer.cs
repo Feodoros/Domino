@@ -87,25 +87,39 @@ namespace Domino
                     {
                         while (checkHand)
                         {
-                            checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
                             // Проверяем есть ли доминошки в базаре,
                             // Если есть, то берем
                             MTable.SBone newSBone;
-                            if (MTable.GetFromShop(out newSBone))
+                            bool emptyShop = MTable.GetFromShop(out newSBone);
+                            if (emptyShop)
                             {
                                 lHand.Add(newSBone);
                                 numbersInHand = FillListWithValues(lHand);
-                                sb = lHand.Last();
-                                lHand.Remove(sb);
-                                return true;
+                                checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
+                                if (!checkHand)
+                                {
+                                
+                                    sb = lHand.Last();
+                                    lHand.Remove(sb);
+                                    if (rightValue == sb.First || rightValue == sb.Second)
+                                        End = true;
+                                
+                                    else
+                                        End = false;
+                                
+                                    return true;
+                                }
+                                
                             }
-
+                    
                             // Если нет, то пропускаем ход
-                            if (!MTable.GetFromShop(out newSBone))
+                            if (!emptyShop)
                             {
-                                sb = lHand.First();
+                                sb = lHand.Last();
+                                End = true;
                                 return false;
                             }
+                            
                         }
                     }
 
@@ -124,6 +138,13 @@ namespace Domino
                         Random r = new Random();
                         sb = suitableHand1[r.Next(0, suitableHand1.Count)];
                         lHand.Remove(sb);
+                        if (rightValue == sb.First || rightValue == sb.Second)
+                            End = true;
+                                
+                        else
+                            End = false;
+                                
+                        return true;
                     }
                 }
 
@@ -157,8 +178,15 @@ namespace Domino
                                 checkHand = !numbersInHand.Contains(rightValue) && !numbersInHand.Contains(leftValue);
                                 if (!checkHand)
                                 {
+                                
                                     sb = lHand.Last();
                                     lHand.Remove(sb);
+                                    if (rightValue == sb.First || rightValue == sb.Second)
+                                        End = true;
+                                
+                                    else
+                                        End = false;
+                                
                                     return true;
                                 }
                                 
@@ -168,6 +196,7 @@ namespace Domino
                             if (!emptyShop)
                             {
                                 sb = lHand.Last();
+                                End = true;
                                 return false;
                             }
                             
@@ -190,10 +219,17 @@ namespace Domino
                         Random r = new Random();
                         sb = suitableHand[r.Next(0, suitableHand.Count)];
                         lHand.Remove(sb);
+                        if (rightValue == sb.First || rightValue == sb.Second)
+                            End = true;
+                                
+                        else
+                            End = false;
+                                
+                        return true;
                     }
                 }
             }
-
+            
             return true;
 
         }
