@@ -42,7 +42,10 @@ namespace Domino
             // Создаем и заполняем словарь количества значений у нас на столе
             Dictionary<int, int> freqNumInTable = FillDictWithFreqOfValues(MTable.GetGameCollection());
 
-            sb = lHand.First();
+            MTable.SBone checkSBone = new MTable.SBone();
+            checkSBone.Second = 7;
+            checkSBone.First = 7;
+            sb = checkSBone;
             //End = true;
                         
             //состояние стола
@@ -89,7 +92,7 @@ namespace Domino
                             sBone.Second == rightValue || sBone.Second == leftValue)
                             suitableHand1.Add(sBone);
                     }
-
+                    
                     // 1 подходящая доминошка
                     if (suitableHand1.Count == 1)
                     {
@@ -250,7 +253,7 @@ namespace Domino
                     return GoToShop(out sb, out End);
 
                 }
-                
+
                 // Можем походить 
                 else
                 {
@@ -263,53 +266,56 @@ namespace Domino
                             suitableHand.Add(sBone);
                     }
 
+
                     // 1 подходящая доминошка
                     if (suitableHand.Count == 1)
                     {
-                         sb = suitableHand[0];
+                        sb = suitableHand[0];
                     }
-                    
+
                     // Несколько подходящих доминошек
                     else
                     {
                         // Частота значений на руке
-                        var sortedFreqDict = (from entry in freqNumInHand 
-                            orderby entry.Value descending select entry);
+                        var sortedFreqDict = (from entry in freqNumInHand
+                            orderby entry.Value descending
+                            select entry);
 
                         List<int> sortedListOfFreq = new List<int>();
                         foreach (var kvp in sortedFreqDict)
                         {
                             sortedListOfFreq.Add(kvp.Key);
                         }
-                        
+
                         // Частота значений на столе
-                        var sortedFreqDictTable = (from entry in freqNumInTable 
-                            orderby entry.Value descending select entry);
-                        
+                        var sortedFreqDictTable = (from entry in freqNumInTable
+                            orderby entry.Value descending
+                            select entry);
+
                         List<int> sortedListOfFreqTable = new List<int>();
                         foreach (var kvp in sortedFreqDictTable)
                         {
                             sortedListOfFreqTable.Add(kvp.Key);
                         }
-                        
+
                         List<bool> checkFreqValues = new List<bool>();
                         foreach (var sBone in suitableHand)
                         {
                             if (sBone.First == rightValue || sBone.First == leftValue)
                             {
-                                if(freqNumInHand[sBone.Second] == 1)
+                                if (freqNumInHand[sBone.Second] == 1)
                                     checkFreqValues.Add(true);
-                                if(freqNumInHand[sBone.Second] > 1)
+                                if (freqNumInHand[sBone.Second] > 1)
                                 {
                                     checkFreqValues.Add(false);
                                 }
                             }
-                            
+
                             if (sBone.Second == rightValue || sBone.Second == leftValue)
                             {
-                                if(freqNumInHand[sBone.First] == 1)
+                                if (freqNumInHand[sBone.First] == 1)
                                     checkFreqValues.Add(true);
-                                if(freqNumInHand[sBone.First] > 1)
+                                if (freqNumInHand[sBone.First] > 1)
                                 {
                                     checkFreqValues.Add(false);
                                 }
@@ -318,7 +324,7 @@ namespace Domino
 
                         // Все вторые половинки в одном экземпляре
                         bool oneRepeatValue = !checkFreqValues.Contains(false);
-                        
+
                         // У меня и у соперника <= 3 доминошек на руке
                         bool ifEndGame = lHand.Count <= 3 && enemyBoneCount <= 3;
 
@@ -337,7 +343,7 @@ namespace Domino
                                 MTable.SBone zeroBone;
                                 zeroBone.First = 0;
                                 zeroBone.Second = 0;
-                                
+
                                 sortedListOfFreq.Reverse();
                                 foreach (var value in sortedListOfFreq)
                                 {
@@ -351,6 +357,7 @@ namespace Domino
                                                 break;
                                             }
                                         }
+
                                         if (sBone.Second == rightValue || sBone.Second == leftValue)
                                         {
                                             if (sBone.First == value)
@@ -361,16 +368,19 @@ namespace Domino
                                         }
                                     }
                                 }
-                                
+
                                 if (suitableHand.Contains(zeroBone))
                                 {
                                     sb = zeroBone;
                                 }
                             }
-                            
+
                             // Вторые половинки в одном экземпляре
                             if (oneRepeatValue)
                             {
+                                // Баг: значение sb не присваевается -> жульничаем!
+
+
                                 // Можем заставить пойти на базар
                                 if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count != 0)
                                 {
@@ -381,37 +391,37 @@ namespace Domino
                                             sb = sBone;
                                             break;
                                         }
-                                        
+
                                         if (rightValue == sBone.First && nopeValues.Contains(sBone.Second))
                                         {
                                             sb = sBone;
                                             break;
                                         }
-                                        
+
                                         if (leftValue == sBone.Second && nopeValues.Contains(sBone.First))
                                         {
                                             sb = sBone;
                                             break;
                                         }
-                                        
+
                                         if (rightValue == sBone.Second && nopeValues.Contains(sBone.First))
                                         {
                                             sb = sBone;
                                             break;
                                         }
-                                            
+
                                     }
                                 }
 
                                 // Не можем заставить пойти на базар, т.о.
                                 // Смотрим на стол
-                                if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count == 0)
+                                if (sb.First == checkSBone.First)
                                 {
-                                    
+
                                     MTable.SBone zeroBone;
                                     zeroBone.First = 0;
                                     zeroBone.Second = 0;
-                                
+
                                     sortedListOfFreqTable.Reverse();
                                     foreach (var value in sortedListOfFreqTable)
                                     {
@@ -425,6 +435,7 @@ namespace Domino
                                                     break;
                                                 }
                                             }
+
                                             if (sBone.Second == rightValue || sBone.Second == leftValue)
                                             {
                                                 if (sBone.First == value)
@@ -435,16 +446,16 @@ namespace Domino
                                             }
                                         }
                                     }
-                                
+
                                     if (suitableHand.Contains(zeroBone))
                                     {
                                         sb = zeroBone;
                                     }
                                 }
-                                
+
                             }
                         }
-                        
+
                         // Конец игры
                         if (ifEndGame)
                         {
@@ -458,25 +469,25 @@ namespace Domino
                                         sb = sBone;
                                         break;
                                     }
-                                    
+
                                     if (rightValue == sBone.First && nopeValues.Contains(sBone.Second))
                                     {
                                         sb = sBone;
                                         break;
                                     }
-                                    
+
                                     if (leftValue == sBone.Second && nopeValues.Contains(sBone.First))
                                     {
                                         sb = sBone;
                                         break;
                                     }
-                                    
+
                                     if (rightValue == sBone.Second && nopeValues.Contains(sBone.First))
                                     {
                                         sb = sBone;
                                         break;
                                     }
-                                        
+
                                 }
                             }
 
@@ -487,7 +498,7 @@ namespace Domino
                                 MTable.SBone zeroBone;
                                 zeroBone.First = 0;
                                 zeroBone.Second = 0;
-                                
+
                                 sortedListOfFreq.Reverse();
                                 foreach (var value in sortedListOfFreq)
                                 {
@@ -501,6 +512,7 @@ namespace Domino
                                                 break;
                                             }
                                         }
+
                                         if (sBone.Second == rightValue || sBone.Second == leftValue)
                                         {
                                             if (sBone.First == value)
@@ -511,17 +523,17 @@ namespace Domino
                                         }
                                     }
                                 }
-                                
+
                                 if (suitableHand.Contains(zeroBone))
                                 {
                                     sb = zeroBone;
                                 }
                             }
-                                
+
                         }
 
                         // Оборона (мы явно проигрываем)
-                        if (enemyBoneCount*2 <= lHand.Count)
+                        if (enemyBoneCount * 2 <= lHand.Count)
                         {
                             // Можем заставить пойти на базар
                             if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count != 0)
@@ -533,36 +545,36 @@ namespace Domino
                                         sb = sBone;
                                         break;
                                     }
-                                    
+
                                     if (rightValue == sBone.First && nopeValues.Contains(sBone.Second))
                                     {
                                         sb = sBone;
                                         break;
                                     }
-                                    
+
                                     if (leftValue == sBone.Second && nopeValues.Contains(sBone.First))
                                     {
                                         sb = sBone;
                                         break;
                                     }
-                                    
+
                                     if (rightValue == sBone.Second && nopeValues.Contains(sBone.First))
                                     {
                                         sb = sBone;
                                         break;
                                     }
-                                        
+
                                 }
                             }
 
                             // Не можем заставить пойти на базар, т.о.
                             // Смотрим на руку
-                            if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count == 0)
+                            if (sb.First == checkSBone.First)
                             {
                                 MTable.SBone zeroBone;
                                 zeroBone.First = 0;
                                 zeroBone.Second = 0;
-                                
+
                                 sortedListOfFreq.Reverse();
                                 foreach (var value in sortedListOfFreq)
                                 {
@@ -576,6 +588,7 @@ namespace Domino
                                                 break;
                                             }
                                         }
+
                                         if (sBone.Second == rightValue || sBone.Second == leftValue)
                                         {
                                             if (sBone.First == value)
@@ -586,14 +599,14 @@ namespace Domino
                                         }
                                     }
                                 }
-                                
+
                                 if (suitableHand.Contains(zeroBone))
                                 {
                                     sb = zeroBone;
                                 }
                             }
                         }
-                        
+
                         // Если кол-во очков на базаре и на руке у соперника 
                         // Больше, чем у нас, то вынудим соперника взять весь базар
                         /*if (193 - GetScore() + GetScoreFromTable() < GetScore() + GetScoreFromTable())
@@ -637,10 +650,16 @@ namespace Domino
                         
                     
                         } */
-                        
+
                     }
-                    
+
+
+                    if (sb.First == 7)
+                    {
+                        sb = suitableHand[0];
+                    }
                 }
+
             }
 
             countBonesInShop = MTable.GetShopCount();
@@ -876,6 +895,11 @@ namespace Domino
         static public int countBonesInShop = 13;
 
         #endregion
+        
+        
+        //TODO: Всегда ходить на базар? Улучшение стратегии. Баги, функции.
+        
+         
     }
     
 }
