@@ -34,14 +34,23 @@ namespace Domino
         // Сделать ход
         public static bool MakeStep(out MTable.SBone sb, out bool End)
         {
+            // Отсортированная рука по сумме
             List<MTable.SBone> newHand = SortHand(lHand);
+            
+            // Список значений у нас на руке
             List<int> numbersInHand = FillListWithValues(lHand);
-            Dictionary<int, int> freqNumInHand = FillDictWithFreqOfValues(lHand);
+            
+            // Список значений у нас на столе
             List<int> numbersInTable = FillListWithValues(MTable.GetGameCollection());
+            
+            // Создаем и заполняем словарь количества значений у нас на руке
+            Dictionary<int, int> freqNumInHand = FillDictWithFreqOfValues(lHand);
             
             // Создаем и заполняем словарь количества значений у нас на столе
             Dictionary<int, int> freqNumInTable = FillDictWithFreqOfValues(MTable.GetGameCollection());
-
+            
+            // Проверочная доминошка; если в конце она такая же, то 
+            // Стратегия не дала ответа
             MTable.SBone checkSBone = new MTable.SBone();
             checkSBone.Second = 7;
             checkSBone.First = 7;
@@ -102,6 +111,7 @@ namespace Domino
                     // Несколько подходящих доминошек
                     if (suitableHand1.Count > 1)
                     {
+                        sb = StartStrategyStep(freqNumInHand, freqNumInTable, suitableHand1);
                         // Частота значений на руке
                         var sortedFreqDict = (from entry in freqNumInHand 
                             orderby entry.Value descending select entry);
@@ -158,6 +168,7 @@ namespace Domino
                         // То выкидываем доминошку со второй половиной самой популярной на столе
                         if (!oneRepeatValue)
                         {
+                            WatchOnHand(sortedListOfFreq, suitableHand1)
                             MTable.SBone zeroBone;
                             zeroBone.First = 0;
                             zeroBone.Second = 0;
@@ -195,6 +206,7 @@ namespace Domino
                         // Вторые половинки в одном экземпляре
                         if (oneRepeatValue)
                         {
+                            WatchOnTable(sortedListOfFreqTable, suitableHand1)
                             MTable.SBone zeroBone;
                             zeroBone.First = 0;
                             zeroBone.Second = 0;
@@ -233,6 +245,7 @@ namespace Domino
                         // Просто походим просто самой популярной на руке
                         if (sb.First == checkSBone.First)
                         {
+                            WatchOnHand(sortedListOfFreq, suitableHand1)
                             MTable.SBone zeroBone;
                             zeroBone.First = 0;
                             zeroBone.Second = 0;
@@ -797,6 +810,12 @@ namespace Domino
             return sum;
         }
 
+        // Делаем ход, когда одна доминошка на столе
+        private static MTable.SBone StartStrategyStep( Dictionary<int, int> freqNumInHand,  Dictionary<int, int> freqNumInTable, List<MTable.SBone> suitableHand1)
+        {
+            
+        }
+        
         // Запоминаем значения, за которыми проитивник ходит на базар
         private static List<int> RememberNopeValues(List<int> nopeValues)
         {
