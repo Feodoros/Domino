@@ -229,6 +229,44 @@ namespace Domino
                             }
                         }
                         
+                        // Если не нашли в нашей стратегии подходящую доминошку, то
+                        // Просто походим просто самой популярной на руке
+                        if (sb.First == checkSBone.First)
+                        {
+                            MTable.SBone zeroBone;
+                            zeroBone.First = 0;
+                            zeroBone.Second = 0;
+
+                            sortedListOfFreq.Reverse();
+                            foreach (var value in sortedListOfFreq)
+                            {
+                                foreach (var sBone in suitableHand1)
+                                {
+                                    if (sBone.First == rightValue || sBone.First == leftValue)
+                                    {
+                                        if (sBone.Second == value)
+                                        {
+                                            sb = sBone;
+                                            break;
+                                        }
+                                    }
+
+                                    if (sBone.Second == rightValue || sBone.Second == leftValue)
+                                    {
+                                        if (sBone.First == value)
+                                        {
+                                            sb = sBone;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (suitableHand1.Contains(zeroBone))
+                            {
+                                sb = zeroBone;
+                            }
+                        }
                         
                     }
                     
@@ -378,9 +416,6 @@ namespace Domino
                             // Вторые половинки в одном экземпляре
                             if (oneRepeatValue)
                             {
-                                // Баг: значение sb не присваевается -> жульничаем!
-
-
                                 // Можем заставить пойти на базар
                                 if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count != 0)
                                 {
@@ -417,7 +452,6 @@ namespace Domino
                                 // Смотрим на стол
                                 if (sb.First == checkSBone.First)
                                 {
-
                                     MTable.SBone zeroBone;
                                     zeroBone.First = 0;
                                     zeroBone.Second = 0;
@@ -493,7 +527,7 @@ namespace Domino
 
                             // Не можем заставить пойти на базар, т.о.
                             // Смотрим на руку
-                            if (nopeValues.Intersect(FillListWithValues(suitableHand)).ToList().Count == 0)
+                            if (sb.First == checkSBone.First)
                             {
                                 MTable.SBone zeroBone;
                                 zeroBone.First = 0;
@@ -609,7 +643,7 @@ namespace Domino
 
                         // Если кол-во очков на базаре и на руке у соперника 
                         // Больше, чем у нас, то вынудим соперника взять весь базар
-                        /*if (193 - GetScore() + GetScoreFromTable() < GetScore() + GetScoreFromTable())
+                        if (193 - GetScore() + GetScoreFromTable() < GetScore() + GetScoreFromTable())
                         {
                             // Список всех значений на столе и на нашей руке
                             List<int> FullListOfValues = numbersInHand.Concat(numbersInTable).ToList();
@@ -649,15 +683,48 @@ namespace Domino
                             
                         
                     
-                        } */
+                        } 
 
+                        // Если не нашли в нашей стратегии подходящую доминошку, то
+                        // Просто походим просто самой популярной на руке
+                        if (sb.First == checkSBone.First)
+                        {
+                            MTable.SBone zeroBone;
+                            zeroBone.First = 0;
+                            zeroBone.Second = 0;
+
+                            sortedListOfFreq.Reverse();
+                            foreach (var value in sortedListOfFreq)
+                            {
+                                foreach (var sBone in suitableHand)
+                                {
+                                    if (sBone.First == rightValue || sBone.First == leftValue)
+                                    {
+                                        if (sBone.Second == value)
+                                        {
+                                            sb = sBone;
+                                            break;
+                                        }
+                                    }
+
+                                    if (sBone.Second == rightValue || sBone.Second == leftValue)
+                                    {
+                                        if (sBone.First == value)
+                                        {
+                                            sb = sBone;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (suitableHand.Contains(zeroBone))
+                            {
+                                sb = zeroBone;
+                            }
+                        }
                     }
-
-
-                    if (sb.First == 7)
-                    {
-                        sb = suitableHand[0];
-                    }
+                    
                 }
 
             }
@@ -665,6 +732,7 @@ namespace Domino
             countBonesInShop = MTable.GetShopCount();
             
             lHand.Remove(sb);
+            
             if (rightValue == sb.First || rightValue == sb.Second)
                 End = true;
                                 
