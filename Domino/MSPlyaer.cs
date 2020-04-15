@@ -364,8 +364,8 @@ namespace Domino
             // Все вторые половинки в одном экземпляре
             bool oneRepeatValue = !checkFreqValues.Contains(false);
 
-            // У меня и у соперника <= 3 доминошек на руке
-            bool ifEndGame = lHand.Count <= 3 && GetEnemyBonesCount() <= 3;
+            // У меня или у соперника <= 3 доминошек на руке
+            bool ifEndGame = lHand.Count <= 3 || GetEnemyBonesCount() <= 3;
 
             // Середины игры
             if (!ifEndGame)
@@ -411,10 +411,10 @@ namespace Domino
                 }
 
                 // Не можем заставить пойти на базар, т.о.
-                // Смотрим на руку
+                // Смотрим на стол
                 if (sb.First == GetCheckSBone().First)
                 {
-                    WatchOnSBones(sortedListOfFreq, suitableHand, out sb);
+                    WatchOnSBones(sortedListOfFreqTable, suitableHand, out sb);
                 }
 
             }
